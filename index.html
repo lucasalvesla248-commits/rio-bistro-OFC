@@ -710,9 +710,8 @@ function doSearch(term){
 }
 
 /* ---------- detalhes ---------- */
-// Envie vídeos MP4 à raiz com nomes legíveis: categoria-prato.mp4.
-// Também aceita a forma natural categoria-de-prato.mp4.
-// Ex.: baguete-carne-de-sol-com-gorgonzola.mp4 ou baguete-de-carne-de-sol-com-gorgonzola.mp4.
+// Envie vídeos MP4 ou MOV à raiz com nomes legíveis: categoria-prato.extensão.
+// Também aceita a forma natural categoria-de-prato.extensão.
 const VIDEO_CATEGORY_NAMES = {
   'Omeletes e Crepiocas':'omelete','Tapiocas':'tapioca','Tapimilhos':'tapimilho',
   'Cuscuz':'cuscuz','Wraps':'wrap','Baguetes':'baguete','Adicionais':'adicional',
@@ -748,10 +747,11 @@ function productVideoPaths(item){
   const category=VIDEO_CATEGORY_NAMES[item.sec]||filenameSlug(item.sec);
   let product=filenameSlug(item.n);
   if(category && product.startsWith(category+'-')) product=product.slice(category.length+1);
-  const paths=[category+'-'+product+'.mp4'];
-  if(product && !product.startsWith('de-')) paths.push(category+'-de-'+product+'.mp4');
-  paths.push(product+'.mp4',item.id+'.mp4');
-  return [...new Set(paths)].map(name=>'./'+encodeURIComponent(name));
+  const bases=[category+'-'+product];
+  if(product && !product.startsWith('de-')) bases.push(category+'-de-'+product);
+  bases.push(product,item.id);
+  const names=[...new Set(bases)].flatMap(base=>[base+'.mp4',base+'.mov']);
+  return [...new Set(names)].map(name=>'./'+encodeURIComponent(name));
 }
 function findProductVideo(id,paths,index,poster,request,modal){
   if(index>=paths.length || !window.fetch) return;
@@ -795,7 +795,7 @@ function showProductVideo(id,path,poster){
   video.addEventListener('error',()=>fallbackVideoToImage(video,id),{once:true});
   const source=document.createElement('source');
   source.src=path;
-  source.type='video/mp4';
+  source.type=path.toLowerCase().endsWith('.mov')?'video/quicktime':'video/mp4';
   video.appendChild(source);
   image.replaceWith(video);
   modal.classList.add('video-detail');
