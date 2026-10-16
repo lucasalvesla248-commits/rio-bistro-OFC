@@ -1,0 +1,6 @@
+Rio Bistrô — pacote GitHub Pages sem subpastas
+
+Extraia este ZIP e envie TODOS os arquivos que ele contém para a raiz do repositório GitHub (não envie o ZIP como site).
+Mantenha index.html e os arquivos .webp juntos na mesma raiz.
+Em Settings → Pages, publique a branch usada pelo repositório a partir de /(root).
+As imagens dos produtos são carregadas pelo navegador conforme necessário; o HTML não contém as fotos embutidas.
