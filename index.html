@@ -743,6 +743,14 @@ function filenameSlug(value){
   return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 }
+function youtubeEmbedUrl(value){
+  try{
+    const u=new URL(String(value||''));
+    let id=u.hostname==='youtu.be'?u.pathname.slice(1):u.searchParams.get('v');
+    if(!id){const parts=u.pathname.split('/').filter(Boolean); const index=parts.findIndex(part=>part==='shorts'||part==='embed'||part==='live'); if(index>=0) id=parts[index+1];}
+    return id?'https://www.youtube.com/embed/'+encodeURIComponent(id)+'?autoplay=1&rel=0':'';
+  }catch{return '';}
+}
 function productVideoPaths(item){
   const direct=String(item.videoUrl||'').trim();
   if(direct) return [direct];
@@ -756,8 +764,11 @@ function productVideoPaths(item){
   return [...new Set(names)].map(name=>'./'+encodeURIComponent(name));
 }
 function findProductVideo(id,paths,index,poster,request,modal){
-  if(index>=paths.length || !window.fetch) return;
+  if(index>=paths.length) return;
   const path=paths[index];
+  const embed=youtubeEmbedUrl(path);
+  if(embed){ showProductVideo(id,path,poster); return; }
+  if(!window.fetch) return;
   fetch(path+'?probe='+Date.now(),{method:'HEAD',cache:'no-store'})
     .then(response=>{
       if(request!==detailRequestSequence || !modal.classList.contains('on')) return;
@@ -785,33 +796,26 @@ function showProductVideo(id,path,poster){
   const image=mbody.querySelector('.mimg');
   if(!image) return;
   const modal=document.getElementById('modal');
+  const embed=youtubeEmbedUrl(path);
+  if(embed){
+    const frame=document.createElement('iframe');
+    frame.className='mvideo';
+    frame.src=embed;
+    frame.title='Vídeo do produto '+(byId[id]?.n||'');
+    frame.setAttribute('allow','autoplay; encrypted-media; picture-in-picture');
+    frame.setAttribute('allowfullscreen','');
+    image.replaceWith(frame);
+    modal.classList.add('video-detail');
+    return;
+  }
   const video=document.createElement('video');
-  video.className='mvideo';
-  video.autoplay=true;
-  video.muted=true;
-  video.loop=true;
-  video.playsInline=true;
-  video.preload='auto';
+  video.className='mvideo'; video.autoplay=true; video.muted=true; video.loop=true; video.playsInline=true; video.preload='auto';
   if(poster) video.poster=poster;
   video.setAttribute('aria-label','Vídeo do produto '+(byId[id]?.n||''));
   video.addEventListener('error',()=>fallbackVideoToImage(video,id),{once:true});
-  const source=document.createElement('source');
-  source.src=path;
-  source.type=path.toLowerCase().endsWith('.mov')?'video/quicktime':'video/mp4';
-  video.appendChild(source);
-  image.replaceWith(video);
-  modal.classList.add('video-detail');
-  const sound=document.createElement('button');
-  sound.className='video-sound';
-  sound.type='button';
-  sound.textContent='Ativar som';
-  sound.setAttribute('aria-pressed','false');
-  sound.setAttribute('aria-label','Ativar som do vídeo');
-  sound.addEventListener('click',toggleVideoSound);
-  video.after(sound);
-  video.load();
-  const playback=video.play();
-  if(playback && playback.catch) playback.catch(()=>{});
+  const source=document.createElement('source'); source.src=path; source.type=path.toLowerCase().endsWith('.mov')?'video/quicktime':'video/mp4'; video.appendChild(source);
+  image.replaceWith(video); modal.classList.add('video-detail');
+  const sound=document.createElement('button'); sound.className='video-sound'; sound.type='button'; sound.textContent='Ativar som'; sound.setAttribute('aria-pressed','false'); sound.setAttribute('aria-label','Ativar som do vídeo'); sound.addEventListener('click',toggleVideoSound); video.after(sound); video.load(); const playback=video.play(); if(playback&&playback.catch) playback.catch(()=>{});
 }
 function openDetail(id){
   const it = byId[id];
