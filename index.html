@@ -590,7 +590,7 @@ SECTIONS.forEach(s=>(s.items||[]).forEach(it=>{ byId[it.id]=it; CAT_OF[it.id]=s.
 function badgeHTML(b){
   if(!b || !b.length) return '';
   return b.map(t=>{
-    if(t==='video') return '<span class="bdg video">Vídeo</span>';
+    if(t==='video') return '<span class="bdg video" style="background:#63834b;border-color:#63834b;color:#fff;font-weight:800">▶ Vídeo</span>';
     if(t==='sea') return '<span class="bdg sea">'+fish+'Frutos do mar</span>';
     if(t==='sl') return '<span class="bdg">'+milk+'Sem lactose</span>';
     return '<span class="bdg">'+wheat+'Sem glúten</span>';
@@ -598,12 +598,13 @@ function badgeHTML(b){
 }
 
 /* ---------- card ---------- */
-function thumbHTML(it, badge){
-  const src = IMG[it.img] || (it.simg && IMG[it.simg]) || '';
-  const b = badge ? '<span class="catbadge">'+esc(badge)+'</span>' : '';
-  const open = ' type="button" data-det="'+esc(it.id)+'" aria-label="Ver detalhes de '+esc(it.n)+'"';
-  if(src) return '<button class="thumb"'+open+'><img src="'+src+'" alt="" loading="lazy">'+b+'</button>';
-  return '<button class="thumb ph"'+open+'><span class="phl">'+esc(it.n.trim().charAt(0).toUpperCase())+'</span>'+b+'</button>';
+function thumbHTML(it,badge){
+  const src=IMG[it.img]||(it.simg&&IMG[it.simg])||'';
+  const b=badge?'<span class="catbadge">'+esc(badge)+'</span>':'';
+  const v=it.videoUrl?'<span class="catbadge" style="left:auto;right:8px;top:8px;bottom:auto;background:#63834b;color:#fff;font-size:11px;font-weight:800;letter-spacing:.2px;padding:6px 10px;box-shadow:0 3px 10px rgba(0,0,0,.22)">▶ Vídeo</span>':'';
+  const open=' type="button" data-det="'+esc(it.id)+'" aria-label="Ver detalhes de '+esc(it.n)+'"';
+  if(src) return '<button class="thumb"'+open+'><img src="'+src+'" alt="" loading="lazy">'+b+v+'</button>';
+  return '<button class="thumb ph"'+open+'><span class="phl">'+esc(it.n.trim().charAt(0).toUpperCase())+'</span>'+b+v+'</button>';
 }
 
 function cardHTML(it, catTitle){
