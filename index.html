@@ -748,7 +748,7 @@ function youtubeEmbedUrl(value){
     const u=new URL(String(value||''));
     let id=u.hostname==='youtu.be'?u.pathname.slice(1):u.searchParams.get('v');
     if(!id){const parts=u.pathname.split('/').filter(Boolean); const index=parts.findIndex(part=>part==='shorts'||part==='embed'||part==='live'); if(index>=0) id=parts[index+1];}
-    return id?'https://www.youtube.com/embed/'+encodeURIComponent(id)+'?autoplay=1&rel=0':'';
+    return id?'https://www.youtube.com/embed/'+encodeURIComponent(id)+'?autoplay=1&mute=1&loop=1&playlist='+encodeURIComponent(id)+'&controls=0&modestbranding=1&rel=0&playsinline=1':'';
   }catch{return '';}
 }
 function productVideoPaths(item){
